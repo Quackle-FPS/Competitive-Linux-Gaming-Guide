@@ -1,0 +1,12 @@
+# OS junk
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Editor config
+.vscode/
+.idea/
+
+# Intentionally NOT ignored (GitHub Pages serves this repo's root):
+# index.html, css/, js/, *.md, .nojekyll, LICENSE, README.md

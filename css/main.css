@@ -1,0 +1,178 @@
+/* Competitive Linux Gaming Guide — custom styles.
+   Single home for all non-Tailwind CSS: article typography, TOC, code
+   blocks, copy buttons, callouts, spinner, error card, skip link.
+   JS-injected markup (article, TOC, copy buttons) is styled ONLY here. */
+
+/* ---------- Base ---------- */
+
+:root { color-scheme: dark; }
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .spinner { animation: none; }
+}
+
+::selection { background: rgba(52, 211, 153, 0.3); }
+[id] { scroll-margin-top: 5.5rem; }
+
+/* ---------- Skip link ---------- */
+
+.skip-link {
+  position: absolute; top: 0; left: -9999px; z-index: 60;
+  padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600;
+  color: #34d399; background: #18181b;
+  border: 1px solid #27272a; border-radius: 0 0 0.5rem 0;
+}
+.skip-link:focus { left: 0; }
+
+/* ---------- Table of contents ---------- */
+
+#toc {
+  position: sticky; top: 5.5rem;
+  max-height: calc(100vh - 7rem); overflow-y: auto;
+}
+.toc { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+.toc li { margin: 0; }
+.toc a {
+  display: block; padding: 0.25rem 0 0.25rem 0.5rem;
+  color: #a1a1aa; font-size: 0.875rem; line-height: 1.45;
+  text-decoration: none; border-left: 2px solid transparent;
+}
+.toc a:hover { color: #f4f4f5; }
+.toc a.toc-active { color: #34d399; border-left-color: #34d399; }
+.toc li[data-level="2"] { counter-increment: toc; }
+.toc li[data-level="2"] > a::before {
+  content: counter(toc) ". "; margin-right: 0.25rem; color: #52525b;
+}
+.toc li[data-level="3"] { padding-left: 1rem; }
+.toc li[data-level="4"] { padding-left: 2rem; }
+
+#toc-mobile { background: rgba(9, 9, 11, 0.6); border-bottom: 1px solid #27272a; }
+#toc-mobile summary {
+  padding: 0.75rem 1rem; color: #e4e4e7;
+  font-size: 0.875rem; font-weight: 600; cursor: pointer;
+}
+#toc-mobile summary:hover { color: #34d399; }
+#toc-mobile .toc { padding: 0 1rem 0.75rem; }
+
+/* ---------- Article typography ---------- */
+
+#article {
+  color: #e4e4e7; font-size: 16px; line-height: 1.7;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  counter-reset: section;
+}
+#article h2 {
+  margin-top: 3rem; margin-bottom: 1.25rem; padding-bottom: 0.5rem;
+  color: #fafafa; font-size: 1.5rem; font-weight: 700;
+  border-bottom: 1px solid #27272a; counter-increment: section;
+}
+#article h2::before { content: counter(section) ". "; color: #34d399; }
+#article h3 {
+  margin-top: 2.5rem; margin-bottom: 1rem;
+  color: #fafafa; font-size: 1.25rem; font-weight: 700;
+}
+#article h4 {
+  margin-top: 2rem; margin-bottom: 0.75rem;
+  color: #fafafa; font-size: 1.0625rem; font-weight: 600;
+}
+#article p { margin: 1rem 0; }
+#article strong { color: #fafafa; }
+#article ul { margin: 1rem 0; padding-left: 1.5rem; }
+#article li { margin: 0.375rem 0; }
+#article li::marker { color: #52525b; }
+#article a {
+  color: #34d399; text-decoration: underline;
+  text-decoration-color: rgba(52, 211, 153, 0.4); text-underline-offset: 3px;
+}
+#article a:hover { color: #6ee7b7; text-decoration-color: #6ee7b7; }
+
+/* ---------- Inline code ---------- */
+
+#article :not(pre) > code {
+  padding: 0.15em 0.35em; color: #d4d4d8; font-size: 0.875em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  background: #18181b; border: 1px solid #27272a; border-radius: 0.375rem;
+}
+
+/* ---------- Code blocks + copy button ---------- */
+
+#article pre {
+  position: relative; margin: 1.25rem 0; padding: 2.75rem 1rem 1rem;
+  overflow-x: auto; white-space: pre;
+  background: #18181b; border: 1px solid #27272a; border-radius: 0.5rem;
+  font-size: 0.85rem; line-height: 1.6;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  scrollbar-width: thin; scrollbar-color: #52525b transparent;
+}
+#article pre::-webkit-scrollbar { height: 8px; }
+#article pre::-webkit-scrollbar-thumb { background: #52525b; border-radius: 4px; }
+#article pre::-webkit-scrollbar-track { background: transparent; }
+#article pre code {
+  display: block; padding: 0;
+  font-family: inherit; font-size: inherit; line-height: inherit;
+  background: transparent; border: 0;
+}
+
+.copy-btn {
+  position: absolute; top: 0.5rem; right: 0.5rem; z-index: 1;
+  padding: 0.25rem 0.625rem; color: #a1a1aa;
+  font-size: 0.75rem; font-weight: 600; font-family: inherit;
+  background: #18181b; border: 1px solid #3f3f46; border-radius: 0.375rem;
+  cursor: pointer; opacity: 0.9;
+}
+.copy-btn:hover { color: #f4f4f5; border-color: #52525b; }
+.copy-btn:focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }
+.copy-btn.copied { color: #34d399; border-color: #34d399; }
+
+/* ---------- Blockquote callout ---------- */
+
+#article blockquote {
+  margin: 1.5rem 0; padding: 0.875rem 1.25rem; color: #d4d4d8;
+  background: rgba(24, 24, 27, 0.6);
+  border-left: 3px solid #34d399; border-radius: 0 0.5rem 0.5rem 0;
+}
+#article blockquote p { margin: 0; }
+
+/* ---------- Loading spinner ---------- */
+
+.loading { display: flex; align-items: center; gap: 0.75rem; padding: 3rem 0; color: #a1a1aa; }
+.spinner {
+  width: 1.25rem; height: 1.25rem;
+  border: 2px solid #3f3f46; border-top-color: #34d399; border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Noscript fallback ---------- */
+
+.noscript-box {
+  margin: 1.5rem 0; padding: 1.25rem 1.5rem; color: #d4d4d8;
+  background: #18181b; border: 1px solid #27272a; border-radius: 0.5rem;
+}
+.noscript-box a { color: #34d399; }
+
+/* ---------- Error card ---------- */
+
+.error-card {
+  margin: 2rem 0; padding: 1.5rem; color: #fca5a5;
+  background: #18181b; border: 1px solid #27272a; border-radius: 0.5rem;
+}
+.error-card .error-title { margin: 0 0 0.5rem; font-weight: 700; }
+.error-card .error-message { margin: 0 0 1rem; color: #a1a1aa; font-size: 0.875rem; }
+.retry-btn {
+  padding: 0.375rem 0.875rem; color: #09090b;
+  font-size: 0.875rem; font-weight: 600;
+  background: #34d399; border: 1px solid #34d399; border-radius: 0.375rem;
+  cursor: pointer;
+}
+.retry-btn:hover { background: #6ee7b7; border-color: #6ee7b7; }
+.retry-btn:focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }
+
+/* ---------- Mobile adjustments ---------- */
+
+@media (max-width: 1023px) {
+  #article { font-size: 15px; }
+  #article h2 { font-size: 1.35rem; }
+}
