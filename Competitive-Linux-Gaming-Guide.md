@@ -489,7 +489,7 @@ Cake is also a new and upcoming, strong contender against cosmos. Feel free to c
 
 - No lag gen — uhhh I mean no frame gen! No frame gen!!11! This is input lag city unless your game requires it or you can tune Netborg's `low-latency` for frame gen.
 
-- Use Nvidia DLSS or FSR — some games may actually see performance regression with DLSS/FSR. Overwatch is one of them. **This is your last reminder to always test and benchmark your tweaks.**
+- Use Nvidia DLSS or FSR — some games may actually see performance regression with DLSS/FSR. Overwatch is one of them. **This is your last reminder to ALWAYS test and benchmark your tweaks.**
 
 - Enable Nvidia Reflex — This is a given since we want to take advantage of Reflex 1.5 :)
 
@@ -580,7 +580,7 @@ From Netborg's dxvk github,
 
 For KovaaK's Aim Training, you could apply something like 
 ```sh
-vulkan_present_mode=immediate PROTON_DXVK_LOWLATENCY=1 DXVK_HUD="fps,version,compiler,frametimes,renderlatency,jitter,latencydetails" DXVK_CONFIG="d3d11.maxTessFactor = 8;d3d11.relaxedBarriers = True;dxvk.trackPipelineLifetime = False;dxvk.lowLatencyOffset = 0" game-performance %command%
+PROTON_DXVK_LOWLATENCY=1 DXVK_HUD="fps,version,compiler,frametimes,renderlatency,jitter,latencydetails" DXVK_CONFIG="d3d11.maxTessFactor = 8;d3d11.relaxedBarriers = True;dxvk.trackPipelineLifetime = False;dxvk.lowLatencyOffset = 0" mangohud game-performance %command%
 ```
 
 The envar `DXVK_HUD="fps,version,compiler,frametimes,renderlatency,jitter,latencydetails"` displays your stats to allow you to tune your frame pacing. You would adjust the latency offset until your P95 value is zero. I personally use a value of 100.
@@ -601,6 +601,53 @@ We are barely scratching the surface of how powerful these tools are. Use this k
 https://github.com/netborg-afps/dxvk-low-latency
 
 https://github.com/netborg-afps/vkd3d-low-latency
+
+# `Goverlay` and `MangoHud` (Do Not Skip)
+This guide is intended to work as a universal method to easily access and configure your settings regardless of your GPU. There are other methods to set your presentation modes and that method is mentioned again in the launch commands section.
+
+We want to take advantage of Goverlay's easy configurability with it's GUI. This has the advantage of you being able to switch your presentation modes and HUD configurations on the fly (switching settings while the game is running). Alternatively, you can use the "play" icon button at the bottom to open up the quick preview cube and set the window to the resolution you play at and apply your changes.
+
+ **Please Note:** Some games may crash if your switch your presentation mode too quickly while the game is running. **Currently, this is the easiest way to force and change your presentation modes for Nvidia GPUs.**
+
+We can configure our `MangoHud` by opening `goverlay` in the start menu. Navigate to the `MangoHud` tab and make sure it is toggled ON. Marvel Rivals tends to play nicely with live changes to your Mangohud settings.
+
+Set your settings you desire such as layout, orientation, fonts, font size, position, display metrics and extra informations. I like to have my HUD straight across, centered at the top, with smaller text, and no background alpha. This should be configured in such a way that it is like your car's gauge cluster. Not distracting/obstructing, easy to read, and provides important information with a quick glance.
+
+**Important:** 
+
+You will want to access the `Performance` tab to set your VSYNC (presentation) mode. The available options for Vulkan VSYNC are as followed
+ 
+ - 0=Adaptive Sync/FIFO_RELAXED
+ 
+ - 1=OFF/IMMEDIATE
+ 
+ - 2=MAILBOX/MAILBOX
+ 
+ - 3=ON/FIFO_LATEST_READY
+
+ You can also access the global .conf file at ```~/.config/MangoHud/``` and change `vsync=` to the value of your choosing above.
+
+ Immediate mode allows for screen tearing under some circumstances, and generally has the absolute lowest latency while `FIFO_LATEST_READY` and `MAILBOX` are best used for when you want to take advantage of G-SYNC+VRR+Reflex. `RELAXED` can be inconsistent or cause frame tearing. Testing and validation is advised.
+
+ **AMD users can skip the `mangohud`/`goverlay` option and just use `MESA_VK_WSI_PRESENT_MODE=`. Add `IMMEDIATE`,`MAILBOX`,`FIFO`, or `RELAXED` depending on preference. You will lose the ability to switch presentation modes on the fly and no HUD display.**
+
+ If you don't want to use a stats hud (MangoHud) and wish to set the present mode only, set the settings in `goverlay` to hide by default. You can access this in `Goverlay->MangoHud->Visual` and checkmark `Hide by default` at the bottom of the menu options. Make sure you set a comfortable hotkey for when you want to take a peek at your stats.
+
+ Use the specific games feature of Goverlay to create game-specific settings for your MangoHud and copy the long command to your launch options. Make sure you don't have two instances of `%command%`
+
+# Safe Quickstart Settings To Begin Tuning Frame Buffers
+
+For dx11 games:
+```sh
+PROTON_DXVK_LOWLATENCY=1 DXVK_HUD="fps,version,compiler,frametimes,renderlatency,jitter,latencydetails" DXVK_CONFIG="dxvk.lowLatencyOffset = 0" mangohud game-performance %command%
+```
+
+For dx12 games:
+```sh
+PROTON_VKD3D_LOWLATENCY=1 VKD3D_LOW_LATENCY_OFFSET=100 PROTON_ENABLE_WAYLAND=0 mangohud game-performance %command%
+```
+
+**Note:** If you have performed CPU partition tweak, don't forget to assign your cores. For example, add `taskset -c 16-31` for the 3950X/5950X/7950X/9950X
 
 # Are We Done Yet?! I WANT THE GAME LAUNCH COMMANDS FOR MARVEL RIVALS!! NOW!11!!
 
@@ -631,10 +678,10 @@ Explanation of each launch command for Marvel Rivals:
 - `DXVK_NVAPI_DRS_NGX_DLSS_SR_OVERRIDE_RENDER_PRESET_SELECTION=render_preset_l` Force DLSS preset to model L. If you are on Nvidia 3000 series, preset K may perform better: `DXVK_NVAPI_DRS_NGX_DLSS_SR_OVERRIDE_RENDER_PRESET_SELECTION=render_preset_k`
 - `WINEDLLOVERRIDES="dsound=n"` Enable loading UTOC bypass if you use mods, remove this var if you're not using mods/don't have UTOC bypass installed otherwise your game will not launch.
 - `PROTON_VKD3D_LOWLATENCY=1` Enable Netborg's low latency ("Reflex 1.5"). You can find more information on his github at https://github.com/netborg-afps
-- `VKD3D_LOW_LATENCY_OFFSET=500` Latency offset by 500 microseconds for correct frame pacing, because "NeteaseFuckingSucks" lol and you do not use the low latency toggle in Sigeon v2, this is your low latency toggle. This command is generally not needed for other games, we are using this to combat Marvel Rival's insane frame buffering.
-- `PROTON_LOCAL_SHADER_CACHE=1` Use local shader cache.
+- `VKD3D_LOW_LATENCY_OFFSET=500` Latency offset by 500 microseconds for correct frame pacing, because "NeteaseFuckingSucks" lol and you do not use the low latency toggle in Sigeon v2, this is your low latency toggle. This command at this value is generally not needed for other games, we are using this to combat Marvel Rival's insane frame buffering.
+- `PROTON_LOCAL_SHADER_CACHE=1` Use local shader cache. Remove this var if you are not using Steam Shader Pre-Caching
 - `PROTON_ENABLE_WAYLAND=0` Explicitly disable Wayland, set to 1 to enable Wayland if you're on Wayland, and/or you wish to use HDR.
-- `"/home/quackle/.local/share/goverlay/gameconfig/Marvel Rivals/bgmod"` Marvel Rivals-specific MangoHud setting. Alternatively, you can just use `mangohud` in place of that giant line to use your global MangoHud settings. Or, if you don't want to use a stats hud (MangoHud) and wish to set the present mode only, use the command `vulkan_present_mode=` and add either `immediate`, `fifo_latest_ready`, or `mailbox` after the equal sign. Immediate mode allows for screen tearing under some circumstances, and has the absolute lowest latency while fifo_latest_ready and mailbox are best used for when you want to take advantage of G-SYNC+VRR+Reflex+Mailbox sync.
+- `"/home/quackle/.local/share/goverlay/gameconfig/Marvel Rivals/bgmod"` Marvel Rivals specific MangoHud setting. Alternatively, you can just use `mangohud` in place of that giant line to use your global MangoHud settings. Or, if you don't want to use a stats hud (MangoHud) and wish to set the present mode only, set the settings in `goverlay` to hide by default. You can access this in `Goverlay->MangoHud->Visual` and checkmark `Hide by default` at the bottom of the menu options. Set your VSYNC mode for Vulkan in the performance tab. 0=Adaptive Sync/FIFO_RELAXED, 1=OFF/IMMEDIATE, 2=MAILBOX/MAILBOX, 3=ON/FIFO_LATEST_READY. Immediate mode allows for screen tearing under some circumstances, and generally has the absolute lowest latency while `FIFO_LATEST_READY` and `MAILBOX` are best used for when you want to take advantage of G-SYNC+VRR+Reflex. `RELAXED` can be inconsistent or cause frame tearing, testing and validation is advised.
 - `taskset -c 0-15` Sets the game to use 8 P-Cores and 8 E-Cores on Intel 270K Plus. Edit this to use the cores specific to your system. Do not use this if you are not CPU partitioning. Some users report "AMDip-like" behavior from adding the E-cores depending on Marvel Rivals patches. Set `taskset -c 0-7` if you want to be safe. Personal testing highly advised.
 - `game-performance` Toggle gaming profile of sched-ext, increase game weight and priority, shut off and prevent power saving features, such as monitor dimming/sleep, accidental shutdown.
 - `%command%` Runs the above environment variables.
@@ -645,26 +692,39 @@ My AMD+AMD system's launch commands for Marvel Rivals:
 PROTON_FSR4_UPGRADE=1 DXVK_NVAPI_ALLOW_OTHER_DRIVERS=1 DXVK_CONFIG="dxgi.hideAmdGpu = True" WINEDLLOVERRIDES="dsound=n" PROTON_VKD3D_LOWLATENCY=1 VKD3D_LOW_LATENCY_OFFSET=500 PROTON_LOCAL_SHADER_CACHE=1 PROTON_ENABLE_WAYLAND=0 "/home/quackle/.local/share/goverlay/gameconfig/Marvel Rivals/bgmod" taskset -c 16-31 game-performance %command%
 ```
 
-- `PROTON_FSR4_UPGRADE=1` Force proton FSR4 upgrade to the latest version if your game doesn't have FSR4 available in Linux. This upgrades the default FSR 4.0 in-game to FSR 4.1.1, which can be a significant performance boost for many AMD users.
+- `PROTON_FSR4_UPGRADE=1` Force proton FSR4 upgrade to the latest version if your game doesn't have FSR4 available in Linux. This upgrades the default FSR 4.0 in-game to FSR 4.1.1, which resolves a lot of the performance hit while giving significantly better visuals. On ultra performance with RDNA2 and possibly RDNA3, it looks bad so it’s advised to do performance instead.
 - `DXVK_NVAPI_ALLOW_OTHER_DRIVERS=1` Allows you to use AMD FSR4 option in-game when you're hiding your AMD GPU.
 - `DXVK_CONFIG="dxgi.hideAmdGpu = True"` Hides your AMD GPU instead of spoofing as Nvidia. Usually, spoofing can cause issues like breaking FSR4 path.
 - `WINEDLLOVERRIDES="dsound=n"` Enable loading UTOC bypass if you use mods, remove this var if you're not using mods/don't have UTOC bypass installed otherwise your game will not launch.
 - `PROTON_VKD3D_LOWLATENCY=1` Enable Netborg's low latency ("Reflex 1.5"). You can find more information on his github at https://github.com/netborg-afps
-- `VKD3D_LOW_LATENCY_OFFSET=500` Latency offset by 500 microseconds for correct frame pacing, because "NeteaseFuckingSucks" lol and you do not use the low latency toggle in Sigeon v2, this is your low latency toggle. This command is generally not needed for other games, we are using this to combat Marvel Rival's insane frame buffering.
-- `PROTON_LOCAL_SHADER_CACHE=1` Use local shader cache.
+- `VKD3D_LOW_LATENCY_OFFSET=500` Latency offset by 500 microseconds for correct frame pacing, because "NeteaseFuckingSucks" lol and you do not use the low latency toggle in Sigeon v2, this is your low latency toggle. This command at this value is generally not needed for other games, we are using this to combat Marvel Rival's insane frame buffering.
+- `PROTON_LOCAL_SHADER_CACHE=1` Use local shader cache. Remove this var if you are not using Steam Shader Pre-Caching
 - `PROTON_ENABLE_WAYLAND=0` Explicitly disable Wayland, set to 1 to enable Wayland if you're on Wayland, and/or you wish to use HDR.
-- `"/home/quackle/.local/share/goverlay/gameconfig/Marvel Rivals/bgmod"` Marvel Rivals-specific MangoHud setting. Alternatively, you can just use `mangohud` in place of that giant line to use your global MangoHud settings. Or, if you don't want to use a stats hud (MangoHud) and wish to set the present mode only, use the command `vulkan_present_mode=` and add either `immediate`, `fifo_latest_ready`, or `mailbox` after the equal sign. Immediate mode allows for screen tearing under some circumstances, and has the absolute lowest latency while fifo_latest_ready and mailbox are best used for when you want to take advantage of G-SYNC+VRR+Reflex+Mailbox sync.
+- `"/home/quackle/.local/share/goverlay/gameconfig/Marvel Rivals/bgmod"` Marvel Rivals specific MangoHud setting. Alternatively, you can just use `mangohud` in place of that giant line to use your global MangoHud settings. Or, if you don't want to use a stats hud (MangoHud) and wish to set the present mode only, set the settings in `goverlay` to hide by default. You can access this in `Goverlay->MangoHud->Visual` and checkmark `Hide by default` at the bottom of the menu options. Set your VSYNC mode for Vulkan in the performance tab. 0=Adaptive Sync/FIFO_RELAXED, 1=OFF/IMMEDIATE, 2=MAILBOX/MAILBOX, 3=ON/FIFO_LATEST_READY. Immediate mode allows for screen tearing under some circumstances, and generally has the absolute lowest latency while `FIFO_LATEST_READY` and `MAILBOX` are best used for when you want to take advantage of G-SYNC+VRR+Reflex. `RELAXED` can be inconsistent or cause frame tearing, testing and validation is advised.
 - `taskset -c 16-31` Sets the game to use 8 cores and 8 SMT cores of CCD1 (the second CCD) for 3950X/5950X/7950X/9950X. Edit this to use the cores specific to your system. Do not use this if you are not CPU partitioning.
 - `game-performance` Toggle gaming profile of sched-ext, increase game weight and priority, shut off and prevent power saving features, such as monitor dimming/sleep, accidental shutdown.
 - `%command%` Runs the above environment variables.
 
-# About `DXVK_NVAPI_ALLOW_OTHER_DRIVERS=1` and `DXVK_CONFIG="dxgi.hideAmdGpu = True"`
+# IMPORTANT NOTES AND `DXVK_NVAPI_ALLOW_OTHER_DRIVERS=1` + `DXVK_CONFIG="dxgi.hideAmdGpu = True"`
 
-These two commands are specific to Marvel Rivals, in order to allow AMD to work with the latest FSR4 version and Nvidia Reflex at the time of writing. This may change in the future where `PROTON_FSR4_UPGRADE=1` may no longer be needed.
+These two commands (`DXVK_NVAPI_ALLOW_OTHER_DRIVERS=1` + `DXVK_CONFIG="dxgi.hideAmdGpu = True"`) are specific to AMD GPU Marvel Rivals, in order to allow AMD to work with the latest FSR4 version and Nvidia Reflex at the time of writing. This may change in the future where `PROTON_FSR4_UPGRADE=1` may no longer be needed.
 
-* Special Note: the `"/home/quackle/.local/share/goverlay/gameconfig/Marvel Rivals/bgmod"` and `VKD3D_LOW_LATENCY_OFFSET=500` are specific to the user quackle. The command `"/home/quackle/.local/share/goverlay/gameconfig/Marvel Rivals/bgmod"` is copy pasted with your user when you configure your performance/stats hud in `goverlay`. You do not have to use mangohud, use the command `vulkan_present_mode=immediate` in place of this var or `vulkan_present_mode=mailbox` if you prefer to have no screen tearing even when uncapped FPS at the cost of some near-imperceptible latency. `VKD3D_LOW_LATENCY_OFFSET=500` can be incredibly taxing on many systems, it is advised to start with the default 100 and work your way up.
+**Special Notes:** 
+
+The `"/home/quackle/.local/share/goverlay/gameconfig/Marvel Rivals/bgmod"` and `VKD3D_LOW_LATENCY_OFFSET=500` are specific to the user quackle.
+
+`VKD3D_LOW_LATENCY_OFFSET=500` can be incredibly taxing on many systems, it is advised to start with the default 100 and work your way up/walk the ladder.
+
+ The command `"/home/quackle/.local/share/goverlay/gameconfig/Marvel Rivals/bgmod"` is copy-pasted with your user when you configure your performance/stats hud in `goverlay` for a specific game.
+ 
+ **AMD users can skip the `mangohud`/`goverlay` option and just use `MESA_VK_WSI_PRESENT_MODE=`. Add `IMMEDIATE`,`MAILBOX`,`FIFO`, or `RELAXED` depending on preference.**
+
+ For example, the command can look something like this for my AMD GPU system:
+```sh
+PROTON_FSR4_UPGRADE=1 DXVK_NVAPI_ALLOW_OTHER_DRIVERS=1 DXVK_CONFIG="dxgi.hideAmdGpu = True" WINEDLLOVERRIDES="dsound=n" PROTON_VKD3D_LOWLATENCY=1 VKD3D_LOW_LATENCY_OFFSET=500 PROTON_LOCAL_SHADER_CACHE=1 PROTON_ENABLE_WAYLAND=1 MESA_VK_WSI_PRESENT_MODE=IMMEDIATE taskset -c 16-31 game-performance %command%
+```
 
 I did write this intentionally, so that if you skipped reading, you'll go back and reread instead of blindly copy-pasting everything, and thus learning nothing.
 
 # Acknowledgements
-*Special thanks to my family, wife, growing son, CachyOS community, following members, and the additional readings sourced. Those long sessions of writing information, my wife destresses, feeds me nonstop, and providing valuable feedback and motivation in making this guide palatable for many. My son's early interest in computers further strengthens my motivation to continue the work for him and the future generation of gamers. Netborg, Kruzifixxion, and Cypheriel from the CachyOS community — Netborg's work in developing `dxvk-low-latency` and `vkd3d-low-latency` made it possible for many gamers to enjoy Reflex in a greater level than regular Windows Reflex WITHOUT bannable hacky methods. Kruzifixxion's work in CPU partitioning and little tips n tricks of reducing latency is invaluable to Windows refugees who came to Linux and also...**helping edit and fix my caveman writing LOL.** Generally asking for Process Lasso equivalent functions in other communities resulted in insufferable unhelpful neckbeard responses. Major props to Cypheriel for helping me beautify the guide and cleaning up commands to look more professional. Incredible special thanks and mention to CachyOS member Galih Tama, known as galpt/ararasseo/arasseo for helping me design, launch the github.io website, and the development of cake-sqm-setup! We would be doomed to buying expensive routers just for SQM without his work. Aside from CachyOS members mentioned, a HUGE thank you to Peter Jung — a founding father of CachyOS, and his crew. His values and first interactions with me made CachyOS a safe learning environment for serious esports players and Windows refugees when I first joined. If you enjoyed this guide, please join us in the CachyOS Discord community, say hello and thank you one of many incredible giants and pillars of our community!*
+*Nobody gets here alone, and nobody gets left out unless requested. Special thanks to my family, wife, growing son, CachyOS community, following members, and the additional readings sourced. Those long sessions of writing information, my wife destresses, feeds me nonstop, and providing valuable feedback and motivation in making this guide palatable for many. My son's early interest in computers further strengthens my motivation to continue the work for him and the future generation of gamers. Netborg, Kruzifixxion, and Cypheriel from the CachyOS community — Netborg's work in developing `dxvk-low-latency` and `vkd3d-low-latency` made it possible for many gamers to enjoy Reflex in a greater level than regular Windows Reflex WITHOUT bannable hacky methods. Kruzifixxion's work in CPU partitioning and little tips n tricks of reducing latency is invaluable to Windows refugees who came to Linux and also...**helping edit and fix my caveman writing LOL.** Generally asking for Process Lasso equivalent functions in other communities resulted in insufferable unhelpful neckbeard responses. Major props to Cypheriel for helping me beautify the guide and cleaning up commands to look more professional. Incredible special thanks and mention to CachyOS member Galih Tama, known as galpt/ararasseo/arasseo for helping me design, launch the github.io website, and the development of cake-sqm-setup! We would be doomed to buying expensive routers just for SQM without his work. Aside from CachyOS members mentioned, a HUGE thank you to Peter Jung — a founding father of CachyOS, and his crew. His values and first interactions with me made CachyOS a safe learning environment for serious esports players and Windows refugees when I first joined. If you enjoyed this guide, please join us in the CachyOS Discord community, say hello and thank you one of many incredible giants and pillars of our community!*
