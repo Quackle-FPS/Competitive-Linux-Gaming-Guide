@@ -660,7 +660,7 @@ You'll also want to check in the Downloads tab and decide whether you want to us
 You can mitigate the abysmal vulkan shader processing times by launching steam through the terminal with taskset. For example with the 7950X to use all available cores, you would do the command below
 
 ```sh
-steam taskset -c 0-31
+taskset -c 0-31 steam
 ```
 
 You will want to close Steam after the game is finished processing Vulkan shaders and relaunch without taskset.
